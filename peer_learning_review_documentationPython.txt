@@ -1,0 +1,309 @@
+Question 1:
+----------
+   
+-> * We are given with grid containing 0's and 1's where 0 represent water and 1 represent land
+   * We need to find the size of the biggest river .,i.e, maximum number of continuous adjacent
+     0's the grid
+   * If there is no river in grid return 0
+
+
+My Solution:-
+#############################--Code--#################################
+def isSafe(grid,row,col,r,c):
+    if(r>=row or c>=col or r<0 or c<0 or grid[r][c]== 1 ):
+        return False
+    return True
+
+def dfsTraverse(grid, row, col, r, c):
+
+    #Checking for corner cases
+    if not isSafe(grid, row, col, r, c):
+        return 0
+
+    #Making the current cell as 1 to avoid infinite calling during the below recursive calls for checking for
+    # left right down and up cell
+    grid[r][c]=1
+    #left
+    left=dfsTraverse(grid, row, col, r, c - 1)
+    #right
+    right=dfsTraverse(grid, row, col, r, c + 1)
+    #up
+    up=dfsTraverse(grid, row, col, r - 1, c)
+    #Down
+    down=dfsTraverse(grid, row, col, r + 1, c)
+
+    return 1+left+right+up+down
+
+
+def main():
+    grid=[[0,1,0,1,1], [1, 1, 0, 0, 0], [1, 1, 1, 1, 0], [1, 1, 1, 0, 0]]
+    row=len(grid)
+    col=len(grid[0])
+    result=0
+    for r in range(row):
+        for c in range(col):
+            if(grid[r][c] == 0):
+                result=max(result,dfsTraverse(grid,row,col,r,c))
+    print(result)
+
+if __name__=="__main__":
+    main()
+#########################################################################
+
+
+My Approach:
+ 
+Step-1 : First I defined the main function , took a grid as input and traversed the grid
+Step-2 : while Iterating through the grid, whenever we encounter 0, I checked for its adjacent sides by making a call to a recursive function, dfsTraverse as above
+Step-3 : The recursive function dfsTraverse  implements a basic DFS in order to find the continuous adjacent cells that contains 0
+Step-4 : Inside dfsTraverse, first I made isSafe function that basically checks for corner cases like index out of bound or whether the cell contains 1,
+         in either of the case I.e., if index is out of bound or cell contains 1,there is no way for water, so I returned False otherwise true
+Step-5 : if isSafe function for the current grid cell return true, than first make the current grid cell as 1 (setting grid[r][c]=1) in order to avoid infinite recursive calls while traversing left,right,down
+         and up the grid cell
+Step-6 : Then I made a four recursive calls for traversing left, right, up and down to look for an adjacent cells that contains 0
+Step-7 : Then I summed up the result of all the four direction I.e.,left, right, up and down plus 1 for including the current cell
+Step-8 : In the process, we will keep a track of the the maximum length returned by the recursive function(by comparing maximum of the result and the value returned by the dfsTraverse function)
+Step-9 : Finally after all the Iteration we get our maximum size in the result variable that I printed
+
+Complexity Analysis:
+-> Time Complexity: O(row*col)
+-> Space Complexity : O(1),Auxiliary space used for recursive calls - O(row*col)
+
+
+Team Solution Review for Question 1:
+
+Atuls Solution:-
+----------------
+###############--Code--##################
+def dfs(grid , i,j,n,m):
+        if i<0 or j<0 or i>=n or j>=m or grid[i][j]==2 or grid[i][j]==1:
+            return 0
+
+        grid[i][j] =2
+
+        a= dfs(grid, i+1, j, n, m)
+        b= dfs(grid, i-1, j, n, m)
+        c=dfs(grid, i, j+1, n, m)
+        d=dfs(grid, i, j-1, n, m)
+        return 1+a+b+c+d
+
+
+def max_path(grid):
+    n= len(grid)
+    m= len(grid[0])
+    ans =0
+
+    for i in range(n):
+        for j in range(m):
+            if(grid[i][j]==0):
+                ans = max(ans,dfs(grid,i,j,n,m))
+
+
+    return ans
+
+lst = [[1,0,0,0,1]]
+
+print(max_path(lst))
+
+#########################################
+
+Difference in approach:
+ -> The above solution is similar to my approach but its bit different from step 5 of my approach ,
+    i.e method of avoiding infinite recursive calls- he has set the current cell to the value 2, which I had set it to 1
+    due to which he has to put extra condition in base case to check whether the current grid cell contains 2 along with 1.But anyway it works the same.
+    Also to check for corner cases , he has implemented the base condition in the dfs function itself which in my case I created the separate
+    function isSafe to check for corner cases.
+
+
+Sarthak Solution:-
+------------------
+#############---Code---#############
+def dfs(node,grid):
+      x,y = node
+      grid[x][y]=1
+      size=0
+      n=len(grid)
+      m=len(grid[0])
+
+      for dx,dy in [(-1,0) , (1,0) ,(0,1) ,(0,-1)]:
+            new_x,new_y = x+dx, y+dy
+            if 0 <= new_x < n and 0 <= new_y < m and grid[new_x][new_y] == 0:
+                      size += dfs((new_x,new_y),grid)
+      return size+1
+
+def find_max_path(grid):
+    ans=0
+    n=len(grid)
+    m=len(grid[0])
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == 0:
+                ans=max(ans,dfs((i,j),grid))
+    return ans
+#####################################
+
+        
+Difference in approach:
+-> Approach is somewhat similar to mine but the traversal technique on left, right ,up and down upon encounter 0 is different than mine.
+-> He looped through the direction list and checked for the corner cases ,thereby traversing on all the four adjacent sides looking for 0's and 
+   then summed up and returned the size +1 which in my case is different
+-> I explicitly made 4 recursive calls specifying all the four direction without looping and then summing up all the four sides plus one i.e., for including current cell
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Question 2:
+----------
+
+-> * We have to design a logger system that receives a stream of messages along with their timestamps.
+   * Each unique message should only be printed at most every 10 seconds
+   * a message printed at timestamp t will prevent other identical messages from being printed until  
+     timestamp t + 10
+   * All messages will come in chronological order. 
+
+   Implement the Logger class:
+    -> Logger() Initializes the logger object.
+    -> Returns true if the message should be printed in the given timestamp, otherwise returns false.
+
+My Solution:-
+##################--Code--##################
+class logger:
+    output_list=[]
+    def __init__(self):
+        self.message_dict={}
+        self.output_list.append('null')
+
+    def shouldPrintMessage(self,timestamp,message):
+        # print(timestamp,message)
+        if message not in self.message_dict:
+            self.message_dict[message]=timestamp
+            return True
+        elif self.message_dict[message]+10<=timestamp:
+            self.message_dict[message]=timestamp
+            return True
+        else:
+            return False
+
+def main():
+    log_obj=logger()
+    a=[[],[1, "foo"], [2, "bar"], [3, "foo"], [8, "bar"], [10, "foo"], [11, "foo"]]
+    for item in a:
+        if item:
+            log_obj.output_list.append(log_obj.shouldPrintMessage(item[0],item[1]))
+
+    print(log_obj.output_list)
+
+if __name__=='__main__':
+    main()
+
+############################################
+
+My Approach:
+
+Step-1 : First I created the class name Logger where I declare one data member output_list which will store the list of boolean message representing if the message is accepted or rejected
+Step-2 : Then I created the constructor using __init__ function wherein I initialised one dictionary which will store the message along with the timestamp depicting when it arrived and also
+         I initially appended null in output list
+Step-3 : Then I created shouldPrintMessage function which takes two parameters timestamp and message, as the message arrives to input stream this function would get called with two arguments message and timestamp
+Step-4 : Inside the shouldPrintMessage I checked for different conditions to check if message is accepted or rejected
+               -> if the message is arriving for the 1st time, update the dictionary for the particular message by its timestamp and return True
+               -> if the message is already there in the dictionary, then check for the timestamp for that particular message, if the message came within 10 sec difference in timestamps then return false
+                  Otherwise update the dictionary for the particular message by its timestamp and return True.
+Step-5 : Then in the main function I created the logger class object and took the 2d list as input containing timestamp and message and traversed the list and printed the desired result.
+
+
+Complexity Analysis:
+-> Time Complexity: O(n),where n depends on number of message coming in message_stream
+-> Space Complexity : O(n),where n depends on number of message coming in message_stream
+
+ 
+Team Solution Review for Question 2:
+
+Atuls Solution:-
+################--code--####################
+
+class Logger:
+
+    def __init__(self):
+        self.msg ={}
+
+    def shouldPrintMessage(self, timestamp, message):
+
+        if message not in self.msg:
+            self.msg[message] = timestamp
+            return True
+
+        if self.msg[message] + 10 <= timestamp:
+            self.msg[message] = timestamp
+            return True
+        else:
+            return False
+
+logger = Logger()
+
+print(logger.shouldPrintMessage(10, "foo"))
+
+##############################################
+
+Difference in approach:
+-> Logic is same as mine but the only difference is the way of printing out the output,Here he is directly printing the output as True or False for a particular message 
+   but in my case I am appending the output for each message in list and then after traversing all the elements in a 2d list, I am printing out the final output as a list.
+-> Also I have taken 2d list as input for the message stream and timestamp and then traversed each element and passed on to the shouldPrintMessage function to get the 
+   required output but in his case he just passed one message with timestamp
+
+
+
+Sarthak Solution:-
+------------------
+
+################--code--####################
+
+from collections import deque
+ 
+class Logger(object):
+ 
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self._msg_set = set()
+        self._msg_queue = deque()
+    
+    def shouldPrintMessage(self, timestamp, message):
+        """
+        Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        """
+        while self._msg_queue:
+            msg, ts = self._msg_queue[0]
+            if timestamp - ts >= 10:
+                self._msg_queue.popleft()
+                self._msg_set.remove(msg)
+            else:
+                break
+        
+        if message not in self._msg_set:
+            self._msg_set.add(message)
+            self._msg_queue.append((message, timestamp))
+            return True
+        else:
+            return False
+
+##############################################
+
+Difference in approach:
+-> Way of implementing is different from mine, he has use data structure set and dequeue to keep a track of messages and timestamp, while in my case I used dictionary in python
+-> If the message is not there in the set ,i.e, if the message arrived for the first time or after 10 sec of previous instance of message timestamp, he added the message to the set and appended the message and    
+   timestamp in form of tuple in dequeue and returned True, Otherwise false
+-> If the message is there in the queue, he checked for timestamp for that particular message, if its arrived with a difference of 10 seconds, if the message arrived after 10seconds he popped the message from   
+   dequeue and removed the particular message from the set - This works as the message comes in chronological order of its timestamp ,And removed that particular message from set otherwise break out
+-> He is poping out all the instances from the set which has a timestamp difference more than 10 in a while loop, as after 10 sec whatever message is arriving will act as a new message in a set which
+   He is handling in the if condition..
+-> Loved the approach
+
+
+
+
+
+
+
